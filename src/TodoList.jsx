@@ -12,7 +12,7 @@ function TodoList() {
       {todos.map((todo) => {
         return (
         <TodoListItem 
-           key={todo.id}
+           key={todo.id} title={todo.title}
         />
       );
     })}

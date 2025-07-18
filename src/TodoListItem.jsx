@@ -1,6 +1,6 @@
-function TodoListItem({todo}) {
+function TodoListItem(props) {
   return (
-    <li>{todo}</li>
+    <li>{props.title}</li>
   );
 };
 
