@@ -1,16 +1,20 @@
 
+import { useState } from 'react';
 import './App.css';
 import TodoForm from './TodoForm';
-import Todolist from './TodoList';
+import TodoList from './TodoList';
 
 function App() {
+  const [newTodo, setNewTodo] = useState('Todo Added.');
+
   return (
     <div>
       <h1>My Todos</h1>
-      <Todolist />
+      <TodoList />
+      <p>{newTodo}</p>
       <TodoForm />
-    </div>
-  )
-}
+    </div>    
+  );
+};
 
 export default App;
