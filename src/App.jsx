@@ -20,7 +20,7 @@ function App() {
       });
     setTodoList(updatedTodos);
     }
-
+  
   return (
     <div>
       <h1>My Todos</h1>

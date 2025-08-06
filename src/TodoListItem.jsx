@@ -1,5 +1,4 @@
 function TodoListItem({ todo, withCompleteTodo}) {
-  console.log(todo, withCompleteTodo);
   return (
     <li title={todo}>
       <form>
