@@ -20,42 +20,17 @@ const encodeUrl = ({ sortField, sortDirection, queryString}) => {
 function App() {
 
   const [todoList, setTodoList] = useState([]);
-<<<<<<< Updated upstream
-  function addTodo(title) {
-    const newTodo = {title: title, id:Date.now(), isCompleted: false}
-    setTodoList([...todoList, newTodo]);
-  }
-=======
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [sortField, setSortField] = useState("createdTime");
-  const [sortDirection, setSortDirection] = useState("desc");
-  const [queryString, setQueryString] = useState("");
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+  
+  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
+  const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
-  function updateTodo(editedTodo) {
-    const update = todoList.map((todo) => {
-      if (todo.id === editedTodo.id) {
-        return { ...editedTodo };
-      }
-        return todo;
-    })
-  setTodoList(update);
-  }
+  useEffect(() => {
+    const fetchTodos = async () => {
+      setIsLoading(true);
 
-<<<<<<< Updated upstream
-  function completeTodo(todoId) {
-      const updatedTodos = todoList.map((todo) => {
-        if (todo.id === todoId) {
-          return { ...todo, isCompleted: true}
-        }
-          return todo;
-      });
-=======
       const options = {
         method: "GET",
         headers: {
@@ -203,7 +178,6 @@ function App() {
       const updatedTodos = todoList.map((todo) => 
         todo.id === todoInfo.id ? todoInfo : todo 
       );
->>>>>>> Stashed changes
     setTodoList(updatedTodos);
     }
   
@@ -211,9 +185,6 @@ function App() {
     <div>
       <h1>My Todos</h1>
       <TodoForm onAddTodo={addTodo}/>
-<<<<<<< Updated upstream
-      <TodoList todoList={todoList} onCompleteTodo={completeTodo} updateTodo={updateTodo}/>
-=======
       {isLoading ? (
         <p>Todo list loading...</p>
       ) : (
@@ -233,7 +204,6 @@ function App() {
           </div>
         </div>
       )}
->>>>>>> Stashed changes
     </div>    
   );
 };
