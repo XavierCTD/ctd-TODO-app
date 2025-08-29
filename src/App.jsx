@@ -3,6 +3,19 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import TodoForm from './features/TodoForm.jsx';
 import TodoList from './features/TodoList/TodoList.jsx';
+import TodosViewForm from './features/TodosViewForm.jsx';
+
+const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
+const token = `Bearer ${import.meta.env.VITE_PAT}`;
+
+const encodeUrl = ({ sortField, sortDirection, queryString}) => {
+  let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
+  let searchQuery = "";
+  if (queryString) {
+    searchQuery = `&filterByFormula=SEARCH("${queryString}",+title)`;
+  }
+  return encodeURI(`${url}?${sortQuery}${searchQuery}`)
+};
 
 function App() {
 
@@ -25,12 +38,13 @@ function App() {
         },
       };
       try {
-        const resp = await fetch(url, options);
+        const resp = await fetch(encodeUrl({ sortField, sortDirection, queryString}), options);
         if (!resp.ok) {
           throw new Error(resp.statusText);
         }
         const response = await resp.json();
-
+        console.log(response);
+        
         const fetchedData = response.records.map((record) => {
           return {
             id: record.id,
@@ -38,9 +52,11 @@ function App() {
             isCompleted: record.fields.isCompleted || false,
           };
         });
-
+        
+        console.log(fetchedData)
         setTodoList(fetchedData);
       } catch (error) {
+        console.log(error)
         setErrorMessage(error.message)
       } finally {
         setIsLoading(false);
@@ -49,7 +65,7 @@ function App() {
     };
     
     fetchTodos();
-  }, []);
+  }, [sortDirection, sortField, queryString]);
 
   const addTodo = async (newTodo) => {
     const payload = {
@@ -118,15 +134,13 @@ function App() {
       method: "PATCH",
       headers: {
         Authorization: token,
-        "Contnet-Type": "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     };
 
     try {
-      setIsSaving(true);
       const resp  = await fetch(url, options);
-
       if(!resp.ok) {
         throw new Error(resp.statusText);
       };
@@ -147,7 +161,7 @@ function App() {
         )
       );
     } catch(error) {
-      console.error(error);
+      console.error();
       setErrorMessage(`${error.message}. Reverting todo...`);
 
       const revertedTodos = todoList.map((todo) => 
@@ -217,9 +231,15 @@ function App() {
 
       {errorMessage && (
         <div>
-          <hr />
-          <p>{errorMessage}</p>
-          <button onClick={() => setErrorMessage("")}>Dismiss</button>
+          <label>Search todos:</label>
+          <input type='text' value={queryString} onChange={((event) => {setQueryString(event.target.value)})} />
+          <button type='button'>Clear</button>
+          <div>
+            <hr />
+            <TodosViewForm sortDirection={sortDirection} setSortDirection={setSortDirection} sortField={sortField} setSortField={setSortField} queryString={queryString} setQueryString={setQueryString}/>
+            <p>{errorMessage}</p>
+            <button onClick={() => setErrorMessage("")}>Dismiss</button>
+          </div>
         </div>
       )}
     </div>    
