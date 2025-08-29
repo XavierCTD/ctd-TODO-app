@@ -1,13 +1,17 @@
 import TextInputWithLabel from "../../shared/TextInputWithLabel";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function TodoListItem({ todo, withCompleteTodo, onUpdateTodo}) {
 
 const [workingTitle, setWorkingTitle] = useState(todo.title);
 const [isEditing, setIsEditing] = useState(false);
 
+useEffect(() => {
+  setWorkingTitle(todo.title || "")
+}, [todo]);
+
 const handleCancel = () => {
-  setWorkingTitle(todo.title);
+  setWorkingTitle(todo.title || "");
   setIsEditing(false);
 }
 
@@ -28,7 +32,7 @@ const handleEdit = (event) => {
       <form onSubmit={handleUpdate}>
         {isEditing ? (
           <>
-          <TextInputWithLabel value={workingTitle} onChange={handleEdit}/>
+          <TextInputWithLabel elemnetId={`edit-${todo.id}`} label="Edit Todo" value={workingTitle} onChange={handleEdit}/>
           <button type="button" onClick={handleCancel}>Cancel</button>
           <button type="button" onClick={handleUpdate}>Update</button>
           </>
@@ -38,8 +42,12 @@ const handleEdit = (event) => {
               <input
                   type="checkbox"
                   id={`checkbox${todo.id}`}
-                  checked={todo.isCompleted}
-                  onChange={() => withCompleteTodo(todo.id)}
+                  checked={todo.isCompleted || false}
+                  onChange={() => withCompleteTodo({
+                    ...todo,
+                    isCompleted: !todo.isCompleted,
+                  })
+                }
               />
             </label>
             <span onClick={() => setIsEditing(true)}>{todo.title}</span>

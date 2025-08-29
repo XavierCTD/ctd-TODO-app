@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import TodoForm from './features/TodoForm.jsx';
 import TodoList from './features/TodoList/TodoList.jsx';
@@ -44,6 +44,7 @@ function App() {
         }
         const response = await resp.json();
         console.log(response);
+        
         const fetchedData = response.records.map((record) => {
           return {
             id: record.id,
@@ -89,6 +90,7 @@ function App() {
 
     try {
       setIsSaving(true);
+      
       const resp = await fetch(url, options);
       if(!resp.ok) {
         throw new Error(resp.statusText);
@@ -179,7 +181,43 @@ function App() {
         todo.id === todoInfo.id ? todoInfo : todo 
       );
     setTodoList(updatedTodos);
+
+    const payload = {
+      records: [
+        {
+          id: todoInfo.id,
+          fields: {
+            title: todoInfo.title,
+            isCompleted: todoInfo.isCompleted,
+          },
+        },
+      ],
+    };
+
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+
+    try {
+      const resp = await fetch(url, options);
+      if (!resp.ok) {
+        throw new Error("ERROR: Todo Failed");
+      };
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(`${error.message} Reverting todo...`);
+
+      const revertedTodos = todoList.map((todo) => 
+        todo.id === originalTodo.id ? originalTodo : todo
+      );
+      setTodoList(revertedTodos);
     }
+  };
   
   return (
     <div>
