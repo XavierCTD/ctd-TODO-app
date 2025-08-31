@@ -23,9 +23,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  
-  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
-  const token = `Bearer ${import.meta.env.VITE_PAT}`;
+  const [sortField, setSortField] = useState("createdTime");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [queryString, setQueryString] = useState("");
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -44,7 +44,10 @@ function App() {
         }
         const response = await resp.json();
         console.log(response);
+<<<<<<< Updated upstream
         
+=======
+>>>>>>> Stashed changes
         const fetchedData = response.records.map((record) => {
           return {
             id: record.id,
@@ -90,7 +93,6 @@ function App() {
 
     try {
       setIsSaving(true);
-      
       const resp = await fetch(url, options);
       if(!resp.ok) {
         throw new Error(resp.statusText);
