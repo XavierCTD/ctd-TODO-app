@@ -43,11 +43,6 @@ function App() {
           throw new Error(resp.statusText);
         }
         const response = await resp.json();
-        console.log(response);
-<<<<<<< Updated upstream
-        
-=======
->>>>>>> Stashed changes
         const fetchedData = response.records.map((record) => {
           return {
             id: record.id,
@@ -56,7 +51,6 @@ function App() {
           };
         });
         
-        console.log(fetchedData)
         setTodoList(fetchedData);
       } catch (error) {
         console.log(error)
