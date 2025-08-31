@@ -9,12 +9,17 @@ const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${impor
 const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
 const encodeUrl = ({ sortField, sortDirection, queryString}) => {
+  
+  const validFields = ["title", "createdTime"];
+  const safeSortField = validFields.includes(sortField) ? sortField : "title";
+
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
   let searchQuery = "";
+
   if (queryString) {
-    searchQuery = `&filterByFormula=SEARCH("${queryString}",+title)`;
+    searchQuery = `&filterByFormula=SEARCH("${encodeURIComponent(queryString)}", {title})`;
   }
-  return encodeURI(`${url}?${sortQuery}${searchQuery}`)
+  return `${url}?${sortQuery}${searchQuery}`;
 };
 
 function App() {
@@ -27,8 +32,7 @@ function App() {
   const [sortDirection, setSortDirection] = useState("desc");
   const [queryString, setQueryString] = useState("");
 
-  useEffect(() => {
-    const fetchTodos = async () => {
+  const fetchTodos = async () => {
       setIsLoading(true);
 
       const options = {
@@ -37,11 +41,16 @@ function App() {
           "Authorization": token
         },
       };
+
       try {
         const resp = await fetch(encodeUrl({ sortField, sortDirection, queryString}), options);
+
         if (!resp.ok) {
-          throw new Error(resp.statusText);
+          const errorData = await resp.json();
+          console.error("Airtable error full payload:", JSON.stringify(errorData, null, 2));
+          throw new Error(errorData?.error?.message || resp.statusText);
         }
+        
         const response = await resp.json();
         const fetchedData = response.records.map((record) => {
           return {
@@ -53,14 +62,19 @@ function App() {
         
         setTodoList(fetchedData);
       } catch (error) {
-        console.log(error)
-        setErrorMessage(error.message)
+        console.log("Caught error object", error);
+        if (error.response) {
+          const errJson = await error.response.json();
+          console.error("Error response JSON:", errJson);
+        }
+        setErrorMessage(error.message || "Something went wrong");
       } finally {
         setIsLoading(false);
       };
       
     };
-    
+
+  useEffect(() => {
     fetchTodos();
   }, [sortDirection, sortField, queryString]);
 
@@ -89,22 +103,13 @@ function App() {
       setIsSaving(true);
       const resp = await fetch(url, options);
       if(!resp.ok) {
-        throw new Error(resp.statusText);
+        const errorData = await resp.json();
+        throw new Error(errorData.error?.message || resp.statusText);
       }
 
-      const { records } = await resp.json();
-      const savedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-      };
-
-      if (!records[0].fields.isCompleted) {
-        {savedTodo.isCompleted = false;}
-      };
-
-      setTodoList([...todoList, savedTodo]);
+      await fetchTodos();
     } catch(error) {
-      console.error(error);
+      console.error();
       setErrorMessage(error.message);
     } finally  {
       setIsSaving(false);
@@ -112,8 +117,6 @@ function App() {
   };
 
   const updateTodo = async (editedTodo) => {
-    const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
-
     const payload = {
       records: [
         {
@@ -136,34 +139,17 @@ function App() {
     };
 
     try {
+      setIsSaving(true);
       const resp  = await fetch(url, options);
       if(!resp.ok) {
-        throw new Error(resp.statusText);
-      };
-
-      const { records } = await resp.json();
-      const updatedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-      };
-
-      if (!updatedTodo.isCompleted) {
-        updatedTodo.isCompleted = false;
+        const errorData = await resp.json();
+        throw new Error(errorData.error?.message || resp.statusText);
       }
 
-      setTodoList(
-        todoList.map((todo) => 
-          todo.id === updatedTodo.id ? updatedTodo : todo
-        )
-      );
+      await fetchTodos();
     } catch(error) {
       console.error();
-      setErrorMessage(`${error.message}. Reverting todo...`);
-
-      const revertedTodos = todoList.map((todo) => 
-        todo.id === originalTodo.id ? originalTodo : todo
-      );
-      setTodoList(revertedTodos);
+      setErrorMessage(error.message);
     } finally {
       setIsSaving(false);
     }
@@ -171,13 +157,6 @@ function App() {
   
 
   const completeTodo = async (todoInfo) => {
-      const originalTodo = todoList.find((todo) => todo.id === todoInfo.id);
-
-      const updatedTodos = todoList.map((todo) => 
-        todo.id === todoInfo.id ? todoInfo : todo 
-      );
-    setTodoList(updatedTodos);
-
     const payload = {
       records: [
         {
@@ -202,8 +181,11 @@ function App() {
     try {
       const resp = await fetch(url, options);
       if (!resp.ok) {
-        throw new Error("ERROR: Todo Failed");
-      };
+        const errorData = await resp.json();
+        throw new Error(errorData.error?.message || resp.statusText);
+      }
+
+      await fetchTodos();
     } catch (error) {
       console.error(error);
       setErrorMessage(`${error.message} Reverting todo...`);
@@ -219,24 +201,21 @@ function App() {
     <div>
       <h1>My Todos</h1>
       <TodoForm onAddTodo={addTodo}/>
+
       {isLoading ? (
         <p>Todo list loading...</p>
       ) : (
         <TodoList todoList={todoList} onCompleteTodo={completeTodo} updateTodo={updateTodo} isLoading={isLoading}/>
       )};
 
+      <hr />
+            <TodosViewForm sortDirection={sortDirection} setSortDirection={setSortDirection} sortField={sortField} setSortField={setSortField} queryString={queryString} setQueryString={setQueryString}/>
+
       {errorMessage && (
         <div>
-          <label>Search todos:</label>
-          <input type='text' value={queryString} onChange={((event) => {setQueryString(event.target.value)})} />
-          <button type='button'>Clear</button>
-          <div>
-            <hr />
-            <TodosViewForm sortDirection={sortDirection} setSortDirection={setSortDirection} sortField={sortField} setSortField={setSortField} queryString={queryString} setQueryString={setQueryString}/>
             <p>{errorMessage}</p>
             <button onClick={() => setErrorMessage("")}>Dismiss</button>
           </div>
-        </div>
       )}
     </div>    
   );
