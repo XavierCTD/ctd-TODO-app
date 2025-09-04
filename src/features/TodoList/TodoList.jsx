@@ -14,11 +14,11 @@ function TodoList({onCompleteTodo, todoList, updateTodo}) {
         <TodoListItem 
            key={todo.id} todo={todo} withCompleteTodo={onCompleteTodo} onUpdateTodo={updateTodo}
         />
-      );
+      )
     })}
     </ul>}
     </>
-  );
+  )
 };
 
 export default TodoList;
