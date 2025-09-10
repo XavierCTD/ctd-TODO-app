@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import TodoForm from './features/TodoForm.jsx';
 import TodoList from './features/TodoList/TodoList.jsx';
@@ -7,20 +6,6 @@ import TodosViewForm from './features/TodosViewForm.jsx';
 
 const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
 const token = `Bearer ${import.meta.env.VITE_PAT}`;
-
-const encodeUrl = ({ sortField, sortDirection, queryString}) => {
-  
-  const validFields = ["title", "createdTime"];
-  const safeSortField = validFields.includes(sortField) ? sortField : "title";
-
-  let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
-  let searchQuery = "";
-
-  if (queryString) {
-    searchQuery = `&filterByFormula=SEARCH("${encodeURIComponent(queryString)}", {title})`;
-  }
-  return `${url}?${sortQuery}${searchQuery}`;
-};
 
 function App() {
 
@@ -31,8 +16,15 @@ function App() {
   const [sortField, setSortField] = useState("createdTime");
   const [sortDirection, setSortDirection] = useState("desc");
   const [queryString, setQueryString] = useState("");
+  
+    const encodeUrl = useCallback(() => {
+      let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
+      let filterQuery = queryString ? `&filterByFormula=SEARCH("${queryString}", {title})` : "";
+      
+      return encodeURI(`${url}?${sortQuery}${filterQuery}`);
+        }, [sortField, sortDirection, queryString])
 
-  const fetchTodos = async () => {
+    const fetchTodos = async () => {
       setIsLoading(true);
 
       const options = {
@@ -47,8 +39,8 @@ function App() {
 
         if (!resp.ok) {
           const errorData = await resp.json();
-          console.error("Airtable error full payload:", JSON.stringify(errorData, null, 2));
-          throw new Error(errorData?.error?.message || resp.statusText);
+          console.error("Airtable error:", errorData);
+          throw new Error(errorData.error?.message || resp.statusText);
         }
         
         const response = await resp.json();
@@ -62,21 +54,18 @@ function App() {
         
         setTodoList(fetchedData);
       } catch (error) {
-        console.log("Caught error object", error);
-        if (error.response) {
-          const errJson = await error.response.json();
-          console.error("Error response JSON:", errJson);
-        }
-        setErrorMessage(error.message || "Something went wrong");
+        console.error();
+        setErrorMessage(error.message);
       } finally {
         setIsLoading(false);
-      };
-      
+      };   
     };
+    
+    useEffect(() => {
+      fetchTodos();
+    }, [sortDirection, sortField, queryString])
 
-  useEffect(() => {
-    fetchTodos();
-  }, [sortDirection, sortField, queryString]);
+    
 
   const addTodo = async (newTodo) => {
     const payload = {
@@ -206,7 +195,7 @@ function App() {
         <p>Todo list loading...</p>
       ) : (
         <TodoList todoList={todoList} onCompleteTodo={completeTodo} updateTodo={updateTodo} isLoading={isLoading}/>
-      )};
+      )}
 
       <hr />
             <TodosViewForm sortDirection={sortDirection} setSortDirection={setSortDirection} sortField={sortField} setSortField={setSortField} queryString={queryString} setQueryString={setQueryString}/>
