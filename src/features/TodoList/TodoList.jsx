@@ -1,5 +1,6 @@
 
 import TodoListItem from './TodoListItem';
+import styles from './TodoList.module.css';
 
 function TodoList({onCompleteTodo, todoList, updateTodo}) {
 
@@ -8,7 +9,7 @@ function TodoList({onCompleteTodo, todoList, updateTodo}) {
   return (
     <>
     {filteredTodoList.length === 0 ? <p>"Add todo above to get started."</p> : 
-    <ul>
+    <ul className={styles.nopadding}>
       {filteredTodoList.map((todo) => {
         return (
         <TodoListItem 

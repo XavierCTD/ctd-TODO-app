@@ -1,6 +1,67 @@
+:root {
+  --background-detail-one: linear-gradient(50deg, rgb(0, 25, 100), rgb(50, 190, 240), black);
+  --background-detail-two: linear-gradient(50deg, rgba(150, 40, 0, 0.3), rgb(220, 20, 20), grey);
+  --background-detail-three: linear-gradient(50deg, rgb(195, 205, 20), grey, rgb(220, 20, 20));
+  --color-detail: rgba(15, 220, 60, 0.760);
+}
+
 body {
-  background: linear-gradient(50deg, rgb(0, 25, 100), rgb(50, 190, 240), black);
+  background: var(--background-detail-one);
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
+}
+
+h1 {
+  text-shadow: 0 0 10px rgb(240, 220, 5);
+  color: var(--color-detail);
+  font-family: 'Times New Roman', Times, serif;
+  padding: 15px;
+  margin: auto;
+  text-align: justify;
+}
+
+label {
+  color: var(--color-detail);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: large;
+  padding: 5px;
+  text-align: justify;
+  margin: auto;
+  display: contents;
+}
+
+button {
+  background: var(--background-detail-two);
+  color: var(--color-detail);
+  border-radius: 20px;
+  padding: 5.5px;
+  margin: auto;
+  cursor: pointer;
+  float: inherit; 
+}
+
+button:hover {
+  background: var(--background-detail-three);
+  text-align: justify;
+}
+
+button:active {
+  background: var(--background-detail-three);
+  text-align: justify;
+  transform: translateY(3px);
+}
+
+option {
+  background: var(--background-detail-two);
+  color: var(--color-detail);
+}
+
+input {
+  margin: auto 0;
+  padding: 5px;
+  color: var(--color-detail);
+  text-align: inherit;
+  float: inherit;
+  background-color: lightgray;
 }
