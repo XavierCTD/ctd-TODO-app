@@ -1,0 +1,9 @@
+.htmldisplay {
+    display: flex;
+    flex-wrap: inherit;
+}
+
+.newborder {
+    border: 10px black;
+    border-style: dashed;
+}
