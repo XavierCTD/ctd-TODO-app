@@ -2,10 +2,10 @@ import styled from "styled-components";
 
 const StyledLabel = styled.label`
   padding: 20px;
-`
+`;
 
 function TextInputWithLabel({
-    elemnetId,
+    elementId,
     label,
     onChange,
     ref,
@@ -13,10 +13,12 @@ function TextInputWithLabel({
 }) {
     return (
         <>
-        <StyledLabel htmlFor={elemnetId}>{label}</StyledLabel>
+
+        <StyledLabel htmlFor={elementId}>{label}</StyledLabel>
+        
         <input
           type="text"
-          id={elemnetId}
+          id={elementId}
           ref={ref}
           value={value}
           onChange={onChange}
