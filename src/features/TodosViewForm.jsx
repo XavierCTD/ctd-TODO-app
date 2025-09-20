@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components";
+
+const StyledForm = styled.form`
+  padding: 20px;
+`;
 
 function TodosViewForm ({sortDirection , setSortDirection, sortField, setSortField, queryString, setQueryString}) {
    
@@ -14,7 +19,7 @@ function TodosViewForm ({sortDirection , setSortDirection, sortField, setSortFie
    }, [localQueryString, setQueryString]);
 
     return (
-        <form onSubmit={preventRefresh}>
+        <StyledForm onSubmit={preventRefresh}>
        <div>
         <label>Search todos:</label>
         <input type="text" value={localQueryString} onChange={(event) => setLocalQueryString(event.target.value)}/>
@@ -22,19 +27,19 @@ function TodosViewForm ({sortDirection , setSortDirection, sortField, setSortFie
        </div>
 
        <div>
-        <label>Sort by</label>
+        <label>Sort by:</label>
         <select onChange={(event) => setSortField(event.target.value)} value={sortField}>
             <option value="title">Title</option>
             <option value="createdTime">Time added</option>
         </select>
 
-        <label>Direction</label>
+        <label>Direction:</label>
         <select onChange={(event) => setSortDirection(event.target.value)} value={sortDirection}>
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
         </select>
        </div>
-       </form>
+       </StyledForm>
     );
 }
 
