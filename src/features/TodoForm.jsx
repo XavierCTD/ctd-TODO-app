@@ -3,9 +3,15 @@ import TextInputWithLabel from '../shared/TextInputWithLabel';
 import { useRef, useState } from 'react';
 
 const StyledButton = styled.button`
-      font-family: italic;
       font-size: large;
-    `;
+
+      &:disabled {
+      font-style: italic;
+      opacity: 0.8;
+      cursor: not-allowed;
+      }
+    ` 
+    
 
 const StyledForm = styled.form`
   padding: 20px;
