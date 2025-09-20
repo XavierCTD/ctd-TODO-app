@@ -1,0 +1,12 @@
+.htmldisplay {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.newborder {
+    border: 2px dashed black;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
+}

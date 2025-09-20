@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import './App.css';
+import styles from './App.module.css';
 import TodoForm from './features/TodoForm.jsx';
 import TodoList from './features/TodoList/TodoList.jsx';
 import TodosViewForm from './features/TodosViewForm.jsx';
@@ -187,7 +188,7 @@ function App() {
   };
   
   return (
-    <div>
+    <div className={styles.htmldisplay}>
       <h1>My Todos</h1>
       <TodoForm onAddTodo={addTodo}/>
 
@@ -201,7 +202,7 @@ function App() {
             <TodosViewForm sortDirection={sortDirection} setSortDirection={setSortDirection} sortField={sortField} setSortField={setSortField} queryString={queryString} setQueryString={setQueryString}/>
 
       {errorMessage && (
-        <div>
+        <div className={styles.newborder}>
             <p>{errorMessage}</p>
             <button onClick={() => setErrorMessage("")}>Dismiss</button>
           </div>
