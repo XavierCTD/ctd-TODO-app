@@ -1,22 +1,35 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useSearchParams} from 'react-router';
 import './App.css';
-import styles from './App.module.css';
-import TodoForm from './features/TodoForm.jsx';
-import TodoList from './features/TodoList/TodoList.jsx';
-import TodosViewForm from './features/TodosViewForm.jsx';
+import TodosPage from './pages/TodosPage.jsx';
+import Header from "./shared/Header.jsx";
 import {
   todoReducer as todosReducer,
   actions as todoActions,
   initialState as initialTodosState,
 } from './reducers/todos.reducers.js';
+import About from './pages/About.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
 const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
-function App() {
+function AppContent() {
 
+  {/* State Varibles and Hooks */}
   const [todoState, dispatch] = useReducer(todosReducer, initialTodosState);
-  
+  const [title, setTitle] = useState("Todo List");
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  {/* Pagination */}
+  const itemsPerPage = 15;
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const indexOfFirstTodo = (currentPage - 1) * itemsPerPage;
+  const totalPages = Math.ceil(todoState.todoList.length / itemsPerPage);
+  const currentTodos = todoState.todoList.slice( indexOfFirstTodo, indexOfFirstTodo + itemsPerPage);
+
+  {/* URL and Token Reference */}
     const encodeUrl = useCallback(() => {
       const sortQuery = `sort[0][field]=${todoState.sortField}&sort[0][direction]=${todoState.sortDirection}`;
       const filterQuery = todoState.queryString ? `&filterByFormula=SEARCH("${todoState.queryString}", {title})` : "";
@@ -50,7 +63,7 @@ function App() {
     }, [fetchTodos]);
 
     
-
+  {/* Helper Functions */}
   const addTodo = async (newTodo) => {
     const payload = {
       records: [
@@ -177,29 +190,36 @@ function App() {
       });
     }
   };
+
+  {/* Link Reference */}
+  useEffect(() => {
+    if (location.pathname === "/") setTitle("Todo List");
+    else if (location.pathname === "/about") setTitle("About");
+    else setTitle("Not Found");
+  }, [location]);
   
+  {/* JSX Returned */}
   return (
-    <div className={styles.htmldisplay}>
-      <h1>My Todos</h1>
-      <TodoForm onAddTodo={addTodo}/>
-
-      {todoState.isLoading ? (
-        <p>Todo list loading...</p>
-      ) : (
-        <TodoList todoList={todoState.todoList} onCompleteTodo={completeTodo} updateTodo={updateTodo} isLoading={todoState.isLoading}/>
-      )}
-
-      <hr />
-            <TodosViewForm sortDirection={todoState.sortDirection} setSortDirection={(val) => dispatch({type: todoActions.sortDirection, value: val })} sortField={todoState.sortField} setSortField={(val) => dispatch({type: todoActions.sortField, value: val })} queryString={todoState.queryString} setQueryString={(val) => dispatch({type: todoActions.queryString, value: val })}/>
-
-      {todoState.errorMessage && (
-        <div className={styles.newborder}>
-            <p>{todoState.errorMessage}</p>
-            <button onClick={() => dispatch({ type: todoActions.clearError })}>Dismiss</button>
-          </div>
-      )}
-    </div>    
+    <>
+    <Header title={title} />
+    <Routes> 
+      <Route
+         path="/"
+         element={
+           <TodosPage todoState={todoState} todoActions={todoActions} updateTodo={updateTodo} addTodo={addTodo} completeTodo={completeTodo} dispatch={dispatch} currentTodos={currentTodos} totalPages={totalPages} currentPage={currentPage} setSearchParams={setSearchParams}/>
+         }
+    />
+      <Route path="/about" element={<About />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+    </>
   );
 };
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppContent />      
+    </Router>
+  )
+};
