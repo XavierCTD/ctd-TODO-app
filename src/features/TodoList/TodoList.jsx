@@ -1,25 +1,21 @@
-
 import TodoListItem from './TodoListItem';
 import styles from './TodoList.module.css';
 
 function TodoList({onCompleteTodo, todoList, updateTodo}) {
 
-  const filteredTodoList = todoList.filter(todo => todo.isCompleted === false)
-
   return (
     <>
-    {filteredTodoList.length === 0 ? <p>"Add todo above to get started."</p> : 
+    {todoList.length === 0 ? ( <p>"Add todo above to get started."</p> ) : ( 
     <ul className={styles.nopadding}>
-      {filteredTodoList.map((todo) => {
-        return (
+      {todoList.map((todo) => (
         <TodoListItem 
            key={todo.id} todo={todo} withCompleteTodo={onCompleteTodo} onUpdateTodo={updateTodo}
         />
-      )
-    })}
-    </ul>}
+    ))}
+    </ul>
+    )}
     </>
-  )
+  );
 };
 
 export default TodoList;

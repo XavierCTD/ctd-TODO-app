@@ -25,9 +25,6 @@ function AppContent() {
   {/* Pagination */}
   const itemsPerPage = 15;
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const indexOfFirstTodo = (currentPage - 1) * itemsPerPage;
-  const totalPages = Math.ceil(todoState.todoList.length / itemsPerPage);
-  const currentTodos = todoState.todoList.slice( indexOfFirstTodo, indexOfFirstTodo + itemsPerPage);
 
   {/* URL and Token Reference */}
     const encodeUrl = useCallback(() => {
@@ -36,6 +33,12 @@ function AppContent() {
       
       return encodeURI(`${url}?${sortQuery}${filterQuery}`);
         }, [todoActions.queryString, todoActions.sortDirection, todoActions.sortField]);
+
+    const normalizeTodo = (record) => ({
+      id: record.id,
+      title: record.fields.title || "",
+      isCompleted: record.fields.isCompleted || false,
+    });    
 
     const fetchTodos = useCallback(async () => {
       dispatch({ type: todoActions.fetchTodos });
@@ -52,7 +55,9 @@ function AppContent() {
         }
         
         const response = await resp.json();
-          dispatch({ type: todoActions.loadTodos, records: response.records });
+        const todos = response.records.map(normalizeTodo);
+
+          dispatch({ type: todoActions.loadTodos, records: todos });
       } catch (error) {
           dispatch({ type: todoActions.setLoadError, error});
       } 
@@ -94,8 +99,9 @@ function AppContent() {
       }
 
       const response = await resp.json();
-      const savedTodo = response.records[0];
-      dispatch({ type: todoActions.addTodo, savedTodo });
+      const normaltodo = normalizeTodo(response.records[0]);
+
+      dispatch({ type: todoActions.addTodo, savedTodo: normaltodo });
     } catch(error) {
         dispatch({ type: todoActions.setLoadError, error});        
     } finally  {
@@ -136,6 +142,14 @@ function AppContent() {
         const errorData = await resp.json();
         throw new Error(errorData.error.message || resp.statusText);
       }
+
+      const response = await resp.json();
+      const normaltodo = normalizeTodo(response.records[0]);
+
+      dispatch({
+        type: todoActions.updateTodo,
+        editedTodo: normaltodo,
+      });
     } catch(error) {
       dispatch({
         type: todoActions.revertTodo,
@@ -171,17 +185,19 @@ function AppContent() {
     };
 
     try {
-      dispatch({
-        type: todoActions.completeTodo,
-        id: todoInfo.id,
-        isCompleted: todoInfo.isCompleted,
-      });
-
       const resp = await fetch(url, options);
       if (!resp.ok) {
         const errorData = await resp.json();
         throw new Error(errorData.error.message || resp.statusText);
       }
+      
+      const response = await resp.json();
+      const normaltodo = normalizeTodo(response.records[0]);
+
+      dispatch({
+        type: todoActions.completeTodo,
+        editedTodo: normaltodo,
+      });
     } catch (error) {
       dispatch({
         type: todoActions.revertTodo,
@@ -206,7 +222,7 @@ function AppContent() {
       <Route
          path="/"
          element={
-           <TodosPage todoState={todoState} todoActions={todoActions} updateTodo={updateTodo} addTodo={addTodo} completeTodo={completeTodo} dispatch={dispatch} currentTodos={currentTodos} totalPages={totalPages} currentPage={currentPage} setSearchParams={setSearchParams}/>
+           <TodosPage todoState={todoState} todoActions={todoActions} updateTodo={updateTodo} addTodo={addTodo} completeTodo={completeTodo} dispatch={dispatch} currentPage={currentPage} setSearchParams={setSearchParams} itemsPerPage={itemsPerPage} />
          }
     />
       <Route path="/about" element={<About />} />
