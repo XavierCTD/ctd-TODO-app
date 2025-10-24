@@ -50,7 +50,6 @@ function App() {
     }, [fetchTodos]);
 
     
-
   const addTodo = async (newTodo) => {
     const payload = {
       records: [
