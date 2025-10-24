@@ -1,3 +1,7 @@
+:root {
+  --color-detail: rgba(15, 220, 60, 0.760);
+}
+
 .htmldisplay {
     min-height: 100vh;
     display: grid;
@@ -9,4 +13,33 @@
     border: 2px dashed black;
     padding: 8px;
     background: rgba(0, 0, 0, 0.1);
+}
+
+header {
+    position: relative;
+    padding: 1rem;
+}
+
+.title {
+    text-align: center;
+    margin: 0;
+}
+
+nav {
+   position: absolute;
+   top: 1rem;
+   right: 1rem;
+   display: flex;
+   gap: 0.5rem;
+   float: inherit;
+}
+
+.active {
+    color: gray;
+    text-decoration: none;
+}
+
+.inactive {
+    color: black;
+    text-decoration: none;
 }

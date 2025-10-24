@@ -34,11 +34,7 @@ export function todoReducer(state = initialState, action) {
         case actions.loadTodos:
             return {
                 ...state,
-                todoList: action.records.map((record) => ({
-                    id: record.id,
-                    title: record.fields.title || "",
-                    isCompleted: record.fields.isCompleted || false,
-                })),
+                todoList: action.records,
                 isLoading: false,
             };
 
@@ -56,14 +52,9 @@ export function todoReducer(state = initialState, action) {
             };
 
         case actions.addTodo:
-            const savedTodo = {
-                id: action.savedTodo.id,
-                title: action.savedTodo.fields.title || "",
-                isCompleted: action.savedTodo.fields.isCompleted || false,  
-            };
             return {
                 ...state,
-                todoList: [...state.todoList, savedTodo],
+                todoList: [...state.todoList, action.savedTodo],
                 isSaving: false,
             };
         
@@ -75,22 +66,24 @@ export function todoReducer(state = initialState, action) {
             };
 
         case actions.updateTodo: {
-            const updateTodos = state.todoList.map((todo) =>
-            todo.id === action.editedTodo.id ? action.editedTodo : todo
+            const updatedTodos = state.todoList.map((todo) =>
+            todo.id === action.editedTodo.id ? { ...todo, ...action.editedTodo } : todo
         );
-            const updatedState = {
-                ...state, 
-                todoList: updateTodos,
+        
+            return {
+                ...state,
+                todoList: updatedTodos,
+                errorMessage: action.error ? action.error.message : state.errorMessage,
             };
-
-            if(action.error) {
-                updatedState.errorMessage = action.error.message;
-            }
-
-            return updatedState;
         };
 
         case actions.completeTodo:
+            if(action.editedTodo) {
+                return {
+                    ...state,
+                    todoList: state.todoList.map((todo) => todo.id === action.editedTodo.id ? action.editedTodo : todo),
+                };
+            }
             return {
                 ...state,
                 todoList: state.todoList.map((todo) =>
@@ -101,19 +94,15 @@ export function todoReducer(state = initialState, action) {
             };
         
         case actions.revertTodo: {
-            const revertTodos = state.todoList.map((todo) =>
+            const revertedTodos = state.todoList.map((todo) =>
             todo.id === action.editedTodo.id ? action.editedTodo : todo 
         );
-            const revertedState = {
+            
+            return {
                 ...state,
-                todoList: revertTodos,
-            };
-
-            if(action.error) {
-                revertedState.errorMessage = action.error.message;
+                todoList: revertedTodos,
+                errorMessage: action.error ? action.error.message : state.errorMessage,
             }
-
-            return revertedState;
         };
         
         case actions.clearError: 
